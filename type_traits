@@ -82,7 +82,43 @@ namespace std{
 		typedef __true_type value;
 	};
 
+	/// remove_reference
+	template<typename _Tp>
+	struct remove_reference {
+		typedef _Tp type;
+	};
 
+	template<typename _Tp>
+	struct remove_reference<_Tp&> {
+		typedef _Tp type;
+	};
+
+	template<typename _Tp>
+	struct remove_reference<_Tp&&> {
+		typedef _Tp type;
+	};
+
+	/// integral_constant
+	template<typename _Tp, _Tp __v>
+	struct integral_constant {
+		static constexpr _Tp                  value = __v;
+		typedef _Tp                           value_type;
+		typedef integral_constant<_Tp, __v>   type;
+		constexpr operator value_type() { return value; }
+    };
+
+	/// typedef for true_type
+	typedef integral_constant<bool, true>     true_type;
+
+	/// typedef for false_type
+	typedef integral_constant<bool, false>    false_type;
+
+	/// is_lvalue_reference
+	template<typename>
+	struct is_lvalue_reference : public false_type { };
+
+	template<typename _Tp>
+	struct is_lvalue_reference<_Tp&> : public true_type { };
 
 }
 
