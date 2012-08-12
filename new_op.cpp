@@ -17,8 +17,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-// Arduino 1.0 contains an implementation for this.
-#if ARDUINO < 100
+// Arduino 1.0 contains buggy incorrect implementation for this. 
+// Please remove it from arduino library before compilation
 
 #include <new>
 #include <cstdlib>
@@ -36,5 +36,3 @@ _UCXXEXPORT void* operator new(std::size_t numBytes) throw(std::bad_alloc){
 	}
 	return p;
 }
-
-#endif

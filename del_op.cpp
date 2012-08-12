@@ -17,8 +17,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-// Arduino 1.0 contains an implementation for this.
-#if ! defined(ARDUINO) || ( ARDUINO < 100 )
+// Arduino 1.0 contains an implementation for this. 
+// Please remove it from there so as not to fragment implementation of stdlib
 
 #include <new>
 #include <cstdlib>
@@ -27,4 +27,3 @@
 _UCXXEXPORT void operator delete(void* ptr) throw(){
 	free(ptr);
 }
-#endif
