@@ -30,8 +30,6 @@
 #ifndef _INITIALIZER_LIST
 #define _INITIALIZER_LIST
 
-#if __cplusplus >= 201103L
-
 #pragma GCC system_header
 
 #pragma GCC visibility push(default)
@@ -61,20 +59,20 @@ namespace std
       : _M_array(__a), _M_len(__l) { }
 
     public:
-      constexpr initializer_list() noexcept
+      constexpr initializer_list()
       : _M_array(0), _M_len(0) { }
 
       // Number of elements.
       constexpr size_type
-      size() const noexcept { return _M_len; }
+      size() const { return _M_len; }
 
       // First element.
       constexpr const_iterator
-      begin() const noexcept { return _M_array; }
+      begin() const { return _M_array; }
 
       // One past the last element.
       constexpr const_iterator
-      end() const noexcept { return begin() + size(); }
+      end() const { return begin() + size(); }
   };
 
   /**
@@ -84,7 +82,7 @@ namespace std
    */
   template<class _Tp>
     constexpr const _Tp*
-    begin(initializer_list<_Tp> __ils) noexcept
+    begin(initializer_list<_Tp> __ils)
     { return __ils.begin(); }
 
   /**
@@ -94,11 +92,10 @@ namespace std
    */
   template<class _Tp>
     constexpr const _Tp*
-    end(initializer_list<_Tp> __ils) noexcept
+    end(initializer_list<_Tp> __ils)
     { return __ils.end(); }
 }
 
 #pragma GCC visibility pop
 
-#endif // __cplusplus >= 201103L
 #endif // _INITIALIZER_LIST
