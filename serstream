@@ -120,7 +120,8 @@ namespace std
 				if ( (char_type)c == '\n' )
 					_serial.print('\r');
 				_serial.print((char_type)c);
-			}
+
+			}
 			return traits::not_eof(c);
 		}
 
