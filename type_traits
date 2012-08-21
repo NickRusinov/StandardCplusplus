@@ -120,6 +120,39 @@ namespace std{
 	template<typename _Tp>
 	struct is_lvalue_reference<_Tp&> : public true_type { };
 
+	/// Member introspection.
+
+	/// is_trivial
+	template<typename _Tp>
+	struct is_trivial
+	: public integral_constant<bool, __is_trivial(_Tp)>
+	{ };
+
+	/// is_standard_layout
+	template<typename _Tp>
+	struct is_standard_layout
+	: public integral_constant<bool, __is_standard_layout(_Tp)>
+	{ };
+
+	/// is_pod
+	// Could use is_standard_layout && is_trivial instead of the builtin.
+	template<typename _Tp>
+	struct is_pod
+	: public integral_constant<bool, __is_pod(_Tp)>
+	{ };
+
+	// Define a nested type if some predicate holds.
+	// Primary template.
+	/// enable_if
+	template<bool, typename _Tp = void>
+	struct enable_if 
+	{ };
+
+	// Partial specialization for true.
+	template<typename _Tp>
+	struct enable_if<true, _Tp>
+	{ typedef _Tp type; };
+
 }
 
 #pragma GCC visibility pop

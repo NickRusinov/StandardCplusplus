@@ -943,38 +943,21 @@ namespace std{
 		ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last,
 			const T& value, Compare comp)
 	{
-		if(first == last){
-			return last;
-		}
-		//If below or equal to the first element
-		if( comp(*first, value) == false){
-			return first;
-		}
-		ForwardIterator middle;
-
-		//If greater than the top element
-		middle = first;
-		advance(middle, distance(first, last) - 1);
-		if( comp(*middle, value) ){
-			return last;
-		}
-
-		//Now begin the actual search for the begining
-		while( distance(first, last) > 1 ){
-			//Find middle
-			middle = first;
-			advance(middle, (distance(first, last)/2) );
-			if( !comp(*middle, value) ){
-				last = middle;
-			}else{
+		typedef typename iterator_traits<ForwardIterator>::difference_type DistanceType;
+		DistanceType len = std::distance(first, last);
+		while (len > 0) {
+			DistanceType half = len >> 1;
+			ForwardIterator middle = first;
+			std::advance(middle, half);
+			if (comp(*middle, value) < 0) {
 				first = middle;
+				++first;
+				len = len - half - 1;
+			} else {
+				len = half;
 			}
 		}
-
-		if( !comp(*first, value) ){
-			return first;
-		}
-		return last;
+		return first;
 	}
 
 	template<class ForwardIterator, class T> _UCXXEXPORT
@@ -990,39 +973,21 @@ namespace std{
 		ForwardIterator upper_bound(ForwardIterator first, ForwardIterator last,
 			const T& value, Compare comp)
 	{
-		if(first == last){
-			return last;
-		}
-		//If below the first element
-		if( comp(value, *first) == true){
-			return first;
-		}
-
-		ForwardIterator middle;
-
-		//If greater than the top element
-		middle = first;
-		advance(middle, distance(first, last) - 1);
-		if( comp(*middle, value) ){
-			return last;
-		}
-
-		//Now begin the actual search for the end
-		while( distance(first, last) > 1 ){
-			//Find middle
-			middle = first;
-			advance(middle, (distance(first, last)/2) );
-			if( comp(value, *middle) ){
-				last = middle;
-			}else{
+		typedef typename iterator_traits<ForwardIterator>::difference_type DistanceType;
+		DistanceType len = std::distance(first, last);
+		while (len > 0) {
+			DistanceType half = len >> 1;
+			ForwardIterator middle = first;
+			std::advance(middle, half);
+			if (comp(value, *middle)){
+				len = half;
+			} else {
 				first = middle;
+				++first;
+				len = len - half - 1;
 			}
 		}
-
-		if( comp(value, *first) ){
-			return first;
-		}
-		return last;
+		return first;
 	}
 
 
