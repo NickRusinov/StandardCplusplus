@@ -19,6 +19,7 @@
 #include <iterator>
 #include <utility.h>
 #include <functional>
+#include <type_traits>
 
 #ifndef __STD_HEADER_ALGORITHM
 #define __STD_HEADER_ALGORITHM 1
@@ -352,11 +353,43 @@ namespace std{
 
 	// subclause _lib.alg.modifying.operations_, modifying sequence operations:
 
+	// This one is should be as effective as memcpy with proper compiler
+	char* copy(char* first, char* last, char* result);
+	char* copy_backward(char* first, char* last, char* result);
+
+	// Specialization for trivially_copiable types. Avoids code bloat by using same realization for all types.
+	template<class T>
+	// is_trivially_copiable is missing in gcc 4.5
+	//inline typename std::enable_if<std::is_trivially_copiable<T>::value, T*>::type 
+	inline typename std::enable_if<std::is_trivial<T>::value, T*>::type 
+	copy(T* first, T* last, T* result) {
+		return reinterpret_cast<T*>(
+			copy(
+				reinterpret_cast<char*>(first),
+				reinterpret_cast<char*>(last) + sizeof(T) - 1,
+				reinterpret_cast<char*>(result)
+			)) - sizeof(T) + 1;
+	}
+
+	template<class T>
+	// is_trivially_copiable is missing in gcc 4.5
+	//inline typename std::enable_if<std::is_trivially_copiable<T>::value, T*>::type 
+	inline typename std::enable_if<std::is_trivial<T>::value, T*>::type 
+	copy_backward(T* first, T* last, T* result) {
+		return reinterpret_cast<T*>(
+			copy_backward(
+				reinterpret_cast<char*>(first),
+				reinterpret_cast<char*>(last) + sizeof(T) - 1,
+				reinterpret_cast<char*>(result)
+			)) - sizeof(T) + 1;
+	}
+
+    // Generic realization for all other types
 	template<class InputIterator, class OutputIterator> _UCXXEXPORT
 		OutputIterator
 		copy(InputIterator first, InputIterator last, OutputIterator result)
 	{
-		while(first != last){
+		while(first != last) {
 			*(result++) = *(first++);
 		}
 		return result;
@@ -367,8 +400,47 @@ namespace std{
 		copy_backward(BidirectionalIterator1 first, BidirectionalIterator1 last,
 			BidirectionalIterator2 result)
 	{
-		while(first !=last ){
+		while(first != last) {
 			*(--result) = *(--last);
+		}
+		return result;
+	}
+
+	// Specialization for trivially_copiable types. Avoids code bloat by using same realization for all types.
+	template<class T>
+	// is_trivially_copiable is missing in gcc 4.5
+	//inline typename std::enable_if<std::is_trivially_copiable<T>::value, T*>::type 
+	inline typename std::enable_if<std::is_trivial<T>::value, T*>::type 
+   	move(T* first, T* last, T* result) {
+        return copy(first, last, result);
+	}
+
+    // Generic realization for all other types
+	template<class InputIterator, class OutputIterator> _UCXXEXPORT
+		OutputIterator
+		move(InputIterator first, InputIterator last, OutputIterator result)
+	{
+		while(first != last) {
+			*(result++) = std::move(*(first++));
+		}
+		return result;
+	}
+
+	template<class T>
+	// is_trivially_copiable is missing in gcc 4.5
+	//inline typename std::enable_if<std::is_trivially_copiable<T>::value, T*>::type 
+	inline typename std::enable_if<std::is_trivial<T>::value, T*>::type 
+   	move_backward(T* first, T* last, T* result) {
+        return copy_backward(first, last, result);
+	}
+
+	template<class BidirectionalIterator1, class BidirectionalIterator2> _UCXXEXPORT
+		BidirectionalIterator2
+		move_backward(BidirectionalIterator1 first, BidirectionalIterator1 last,
+			BidirectionalIterator2 result)
+	{
+		while(first !=last ) {
+			*(--result) = std::move(*(--last));
 		}
 		return result;
 	}
@@ -377,7 +449,7 @@ namespace std{
 		ForwardIterator2
 		swap_ranges(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2)
 	{
-		while(first1 != last1){
+		while(first1 != last1) {
 			iter_swap(first1++, first2++);
 		}
 		return first2;

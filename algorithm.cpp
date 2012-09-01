@@ -23,8 +23,49 @@
 
 namespace std{
 
+	char* copy(char* first, char* last, char* result) {
+        #ifdef __AVR__
+        // This is 1/3 shorter than code produced by GCC
+        asm (
+            "   movw    r30, r24\n"     // Move first to index register Z
+            "   movw    r26, r20\n"     // Move result to index register X
+            "   rjmp    forward_loop_middle\n"
+            "forward_loop_start: ld r18, Z+\n"  // Copy data
+            "   st      X+, r18\n"
+            "forward_loop_middle: cp    r22, r30\n" // first != last
+            "   cpc     r23, r31\n" 
+            "   brne    forward_loop_start\n"
+            "   movw    r24, r30\n"
+        );
+        #else
+		while(first != last){
+			*(result++) = *(first++);
+		}
+		return result;
+        #endif
+	}
 
-
+	char* copy_backward(char* first, char* last, char* result) {
+        #ifdef __AVR__
+        // This is 1/3 shorter than code produced by GCC
+        asm (
+            "   movw    r30, r22\n"     // Move first to index register Z
+            "   movw    r26, r20\n"     // Move result to index register X
+            "   rjmp    backward_loop_middle\n"
+            "backward_loop_start: ld r18, -Z\n"  // Copy data
+            "   st      -X, r18\n"
+            "backward_loop_middle: cp    r24, r30\n" // first != last
+            "   cpc     r25, r31\n" 
+            "   brne    backward_loop_start\n"
+            "   movw    r24, r30\n"
+        );
+        #else
+		while(first != last){
+			*(--result) = *(--last);
+		}
+		return result;
+        #endif
+	}
 }
 
 
