@@ -71,6 +71,11 @@ public:
 
 	//Use placement new to engage the constructor
 	void construct(pointer p, const T& val) { new((void*)p) T(val); }
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+    template<typename... Args>
+    void construct(pointer p, Args&&... args)
+	{ ::new((void *)p) T(forward<Args>(args)...); }
+#endif
 	void destroy(pointer p){ ((T*)p)->~T(); }	//Call destructor
 
 	size_type max_size() const throw();

@@ -19,7 +19,6 @@
 #include <basic_definitions>
 #include <string.h>
 #include <exception>
-#include <memory>
 #include <char_traits>
 
 #ifndef __HEADER_TYPE_TRAITS
