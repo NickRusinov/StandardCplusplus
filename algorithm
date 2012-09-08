@@ -353,57 +353,100 @@ namespace std{
 
 	// subclause _lib.alg.modifying.operations_, modifying sequence operations:
 
+    template<typename, typename>
+    struct __are_same : public std::false_type {};
+    template<typename Tp>
+    struct __are_same<Tp, Tp>: public std::true_type {};
+
 	// This one is should be as effective as memcpy with proper compiler
-	char* copy(char* first, char* last, char* result);
-	char* copy_backward(char* first, char* last, char* result);
+	char* __copy(char* first, char* last, char* result);
+    
+    template<bool is_simple>
+    struct __do_copy;
 
 	// Specialization for trivially_copiable types. Avoids code bloat by using same realization for all types.
-	template<class T>
-	// is_trivially_copiable is missing in gcc 4.5
-	//inline typename std::enable_if<std::is_trivially_copiable<T>::value, T*>::type 
-	inline typename std::enable_if<std::is_trivial<T>::value, T*>::type 
-	copy(T* first, T* last, T* result) {
-		return reinterpret_cast<T*>(
-			copy(
-				reinterpret_cast<char*>(first),
-				reinterpret_cast<char*>(last) + sizeof(T) - 1,
-				reinterpret_cast<char*>(result)
-			)) - sizeof(T) + 1;
-	}
-
-	template<class T>
-	// is_trivially_copiable is missing in gcc 4.5
-	//inline typename std::enable_if<std::is_trivially_copiable<T>::value, T*>::type 
-	inline typename std::enable_if<std::is_trivial<T>::value, T*>::type 
-	copy_backward(T* first, T* last, T* result) {
-		return reinterpret_cast<T*>(
-			copy_backward(
-				reinterpret_cast<char*>(first),
-				reinterpret_cast<char*>(last) + sizeof(T) - 1,
-				reinterpret_cast<char*>(result)
-			)) - sizeof(T) + 1;
-	}
+    template<>
+    struct __do_copy<true> {
+        template<class InputIterator, class OutputIterator>
+        static inline OutputIterator do_copy(InputIterator first, InputIterator last, OutputIterator result) {
+            typedef typename std::iterator_traits<InputIterator>::value_type ValueType;
+            return reinterpret_cast<ValueType*>(
+                __copy(
+                    reinterpret_cast<char*>(first),
+                    reinterpret_cast<char*>(last) + sizeof(ValueType) - 1,
+                    reinterpret_cast<char*>(result)
+                )) - sizeof(ValueType) + 1;
+	    }
+    };
+    template<>
+    struct __do_copy<false> {
+        // Universal realization
+        template<class InputIterator, class OutputIterator>
+        static inline OutputIterator do_copy(InputIterator first, InputIterator last, OutputIterator result) {
+            while(first != last) *result++ = *first++;
+            return result;
+        }
+    };
 
     // Generic realization for all other types
 	template<class InputIterator, class OutputIterator> _UCXXEXPORT
 		OutputIterator
 		copy(InputIterator first, InputIterator last, OutputIterator result)
-	{
-		while(first != last) {
-			*(result++) = *(first++);
-		}
-		return result;
+    {
+        typedef typename std::iterator_traits<InputIterator>::value_type ValueTypeI;
+        typedef typename std::iterator_traits<OutputIterator>::value_type ValueTypeO;
+        const bool is_simple = (
+            std::is_trivial<ValueTypeI>::value &&
+            std::is_pointer<InputIterator>::value &&
+            std::is_pointer<OutputIterator>::value &&
+            __are_same<ValueTypeI, ValueTypeO>::value);
+
+        return __do_copy<is_simple>::do_copy(first, last, result);
 	}
 
-	template<class BidirectionalIterator1, class BidirectionalIterator2> _UCXXEXPORT
-		BidirectionalIterator2
-		copy_backward(BidirectionalIterator1 first, BidirectionalIterator1 last,
-			BidirectionalIterator2 result)
+    template<bool is_simple>
+    struct __do_copy_backward;
+
+	char* __copy_backward(char* first, char* last, char* result);
+    template<>
+    struct __do_copy_backward<true> {
+        template<class InputIterator, class OutputIterator>
+        static inline OutputIterator do_copy_backward(
+                InputIterator first, InputIterator last, OutputIterator result) {
+            typedef typename std::iterator_traits<InputIterator>::value_type ValueType;
+            return reinterpret_cast<ValueType*>(
+                __copy_backward(
+                    reinterpret_cast<char*>(first),
+                    reinterpret_cast<char*>(last) + sizeof(ValueType) - 1,
+                    reinterpret_cast<char*>(result)
+                )) - sizeof(ValueType) + 1;
+	    }
+    };
+    template<>
+    struct __do_copy_backward<false> {
+        // Universal realization
+        template<class InputIterator, class OutputIterator>
+        static inline OutputIterator do_copy_backward(
+                InputIterator first, InputIterator last, OutputIterator result) {
+            while(first != last) *result++ = *first++;
+            return result;
+        }
+    };
+
+	template<class InputBidirectionalIterator, class OutputBidirectionalIterator> _UCXXEXPORT
+		OutputBidirectionalIterator
+		copy_backward(InputBidirectionalIterator first, InputBidirectionalIterator last,
+			OutputBidirectionalIterator result)
 	{
-		while(first != last) {
-			*(--result) = *(--last);
-		}
-		return result;
+        typedef typename std::iterator_traits<InputBidirectionalIterator>::value_type ValueTypeI;
+        typedef typename std::iterator_traits<OutputBidirectionalIterator>::value_type ValueTypeO;
+        const bool is_simple = (
+            std::is_trivial<ValueTypeI>::value &&
+            std::is_pointer<InputBidirectionalIterator>::value &&
+            std::is_pointer<OutputBidirectionalIterator>::value &&
+            __are_same<ValueTypeI, ValueTypeO>::value);
+
+        return __do_copy_backward<is_simple>::do_copy_backward(first, last, result);
 	}
 
 	// Specialization for trivially_copiable types. Avoids code bloat by using same realization for all types.

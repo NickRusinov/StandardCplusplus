@@ -27,6 +27,18 @@
 #pragma GCC visibility push(default)
 
 namespace std{
+    #define _DEFINE_SPEC_0_HELPER                          \
+        template<>
+
+    #define _DEFINE_SPEC_1_HELPER                          \
+        template<typename _Tp>
+
+    #define _DEFINE_SPEC_2_HELPER                          \
+        template<typename _Tp, typename _Cp>
+
+    #define _DEFINE_SPEC(_Order, _Trait, _Type, _Value)    \
+        _DEFINE_SPEC_##_Order##_HELPER                     \
+        struct _Trait<_Type> : public integral_constant<bool, _Value> { };
 
 	struct _UCXXEXPORT __true_type{};
 	struct _UCXXEXPORT __false_type{};
@@ -152,6 +164,64 @@ namespace std{
 	struct enable_if<true, _Tp>
 	{ typedef _Tp type; };
 
+// -------------
+  // const-volatile modifications [4.7.1].
+
+  /// remove_const
+  template<typename _Tp>
+    struct remove_const
+    { typedef _Tp     type; };
+
+  template<typename _Tp>
+    struct remove_const<_Tp const>
+    { typedef _Tp     type; };
+  
+  /// remove_volatile
+  template<typename _Tp>
+    struct remove_volatile
+    { typedef _Tp     type; };
+
+  template<typename _Tp>
+    struct remove_volatile<_Tp volatile>
+    { typedef _Tp     type; };
+
+  /// remove_cv
+  template<typename _Tp>
+    struct remove_cv
+    {
+      typedef typename
+      remove_const<typename remove_volatile<_Tp>::type>::type     type;
+    };
+
+  template<typename>
+    struct __is_pointer_helper
+    : public false_type { };
+  _DEFINE_SPEC(1, __is_pointer_helper, _Tp*, true)
+
+  /// is_pointer
+  template<typename _Tp>
+    struct is_pointer
+    : public integral_constant<bool, (__is_pointer_helper<typename
+				      remove_cv<_Tp>::type>::value)>
+    { };
+
+  /// add_const
+  template<typename _Tp>
+    struct add_const
+    { typedef _Tp const     type; };
+   
+  /// add_volatile
+  template<typename _Tp>
+    struct add_volatile
+    { typedef _Tp volatile     type; };
+  
+  /// add_cv
+  template<typename _Tp>
+    struct add_cv
+    {
+      typedef typename
+      add_const<typename add_volatile<_Tp>::type>::type     type;
+    };
 }
 
 #pragma GCC visibility pop

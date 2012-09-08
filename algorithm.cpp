@@ -23,7 +23,7 @@
 
 namespace std{
 
-	char* copy(char* first, char* last, char* result) {
+	char* __copy(char* first, char* last, char* result) {
         #ifdef __AVR__
         // This is 1/3 shorter than code produced by GCC
         asm (
@@ -45,7 +45,7 @@ namespace std{
         #endif
 	}
 
-	char* copy_backward(char* first, char* last, char* result) {
+	char* __copy_backward(char* first, char* last, char* result) {
         #ifdef __AVR__
         // This is 1/3 shorter than code produced by GCC
         asm (
