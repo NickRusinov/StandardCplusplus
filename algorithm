@@ -449,24 +449,25 @@ namespace std{
         return __do_copy_backward<is_simple>::do_copy_backward(first, last, result);
 	}
 
-	// Specialization for trivially_copiable types. Avoids code bloat by using same realization for all types.
-	template<class T>
-	// is_trivially_copiable is missing in gcc 4.5
-	//inline typename std::enable_if<std::is_trivially_copiable<T>::value, T*>::type 
-	inline typename std::enable_if<std::is_trivial<T>::value, T*>::type 
-   	move(T* first, T* last, T* result) {
-        return copy(first, last, result);
-	}
-
     // Generic realization for all other types
 	template<class InputIterator, class OutputIterator> _UCXXEXPORT
 		OutputIterator
 		move(InputIterator first, InputIterator last, OutputIterator result)
 	{
-		while(first != last) {
-			*(result++) = std::move(*(first++));
-		}
-		return result;
+        typedef typename std::iterator_traits<InputIterator>::value_type ValueTypeI;
+        typedef typename std::iterator_traits<OutputIterator>::value_type ValueTypeO;
+        const bool is_simple = (
+            std::is_trivial<ValueTypeI>::value && __are_same<ValueTypeI, ValueTypeO>::value);
+
+        // This condition would be eliminated by compiler
+        if (is_simple) {
+            return copy<InputIterator, OutputIterator>(first, last, result);
+        } else {
+    		while(first != last) {
+	    		*(result++) = std::move(*(first++));
+    		}
+    		return result;
+        }
 	}
 
 	template<class T>
@@ -477,15 +478,25 @@ namespace std{
         return copy_backward(first, last, result);
 	}
 
-	template<class BidirectionalIterator1, class BidirectionalIterator2> _UCXXEXPORT
-		BidirectionalIterator2
-		move_backward(BidirectionalIterator1 first, BidirectionalIterator1 last,
-			BidirectionalIterator2 result)
+	template<class InputBidirectionalIterator, class OutputBidirectionalIterator> _UCXXEXPORT
+		OutputBidirectionalIterator
+		move_backward(InputBidirectionalIterator first, InputBidirectionalIterator last,
+			OutputBidirectionalIterator result)
 	{
-		while(first !=last ) {
-			*(--result) = std::move(*(--last));
-		}
-		return result;
+        typedef typename std::iterator_traits<InputBidirectionalIterator>::value_type ValueTypeI;
+        typedef typename std::iterator_traits<OutputBidirectionalIterator>::value_type ValueTypeO;
+        const bool is_simple = (
+            std::is_trivial<ValueTypeI>::value && __are_same<ValueTypeI, ValueTypeO>::value);
+
+        // This condition would be eliminated by compiler
+        if (is_simple) {
+            return copy_backward<InputBidirectionalIterator, OutputBidirectionalIterator>(first, last, result);
+        } else {
+    		while(first !=last ) {
+	    		*(--result) = std::move(*(--last));
+		    }
+    		return result;
+        }
 	}
 
 	template<class ForwardIterator1, class ForwardIterator2> _UCXXEXPORT
