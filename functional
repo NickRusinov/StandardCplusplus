@@ -35,12 +35,12 @@ namespace std{
 	template <class T> struct modulus;
 	template <class T> struct negate;
 
-	template <class T> struct equal_to;
-	template <class T> struct not_equal_to;
-	template <class T> struct greater;
-	template <class T> struct less;
-	template <class T> struct greater_equal;
-	template <class T> struct less_equal;
+	template <class T = void> struct equal_to;
+	template <class T = void> struct not_equal_to;
+	template <class T = void> struct greater;
+	template <class T = void> struct less;
+	template <class T = void> struct greater_equal;
+	template <class T = void> struct less_equal;
 
 	template <class T> struct logical_and;
 	template <class T> struct logical_or;
@@ -89,91 +89,133 @@ namespace std{
 	};
 
 	template <class T> struct _UCXXEXPORT plus : binary_function<T,T,T>{
-		T operator()(const T& x, const T& y) const{
+		constexpr T operator()(const T& x, const T& y) const{
 			return x + y;
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT minus : binary_function<T,T,T>{
-		T operator()(const T& x, const T& y) const{
+		constexpr T operator()(const T& x, const T& y) const{
 			return x - y;
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT multiplies : binary_function<T,T,T>{
-		T operator()(const T& x, const T& y) const{
+		constexpr T operator()(const T& x, const T& y) const{
 			return x * y;
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT divides : binary_function<T,T,T>{
-		T operator()(const T& x, const T& y) const{
+		constexpr T operator()(const T& x, const T& y) const{
 			return x / y;
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT modulus : binary_function<T,T,T>{
-		T operator()(const T& x, const T& y) const{
+		constexpr T operator()(const T& x, const T& y) const{
 			return x % y;
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT negate : unary_function<T,T>{
-		T operator()(const T& x) const{
+		constexpr T operator()(const T& x) const{
 			return -x;
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT equal_to : binary_function<T,T,bool>{
-		bool operator()(const T& x, const T& y) const{
+		constexpr bool operator()(const T& x, const T& y) const{
+			return (x == y);
+		}
+	};
+
+	template <> struct _UCXXEXPORT equal_to<void> : binary_function<void,void,bool>{
+		template<class T, class U>
+		constexpr bool operator()(const T& x, const U& y) const{
 			return (x == y);
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT not_equal_to : binary_function<T,T,bool>{
-		bool operator()(const T& x, const T& y) const{
+		constexpr bool operator()(const T& x, const T& y) const{
+			return (x != y);
+		}
+	};
+
+	template <> struct _UCXXEXPORT not_equal_to<void> : binary_function<void,void,bool>{
+		template<class T, class U>
+		constexpr bool operator()(const T& x, const U& y) const{
 			return (x != y);
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT greater : binary_function<T,T,bool>{
-		bool operator()(const T& x, const T& y) const{
+		constexpr bool operator()(const T& x, const T& y) const{
+			return (x > y);
+		}
+	};
+
+	template <> struct _UCXXEXPORT greater<void> : binary_function<void,void,bool>{
+		template<class T, class U>
+		constexpr bool operator()(const T& x, const U& y) const{
 			return (x > y);
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT less : binary_function<T,T,bool>{
-		bool operator()(const T& x, const T& y) const{
+		constexpr bool operator()(const T& x, const T& y) const{
+			return (x < y);
+		}
+	};
+
+	template <> struct _UCXXEXPORT less<void> : binary_function<void,void,bool>{
+		template<class T, class U>
+		constexpr bool operator()(const T& x, const U& y) const{
 			return (x < y);
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT greater_equal : binary_function<T,T,bool>{
-		bool operator()(const T& x, const T& y) const{
+		constexpr bool operator()(const T& x, const T& y) const{
+			return (x >= y);
+		}
+	};
+
+	template <> struct _UCXXEXPORT greater_equal<void> : binary_function<void,void,bool>{
+		template<class T, class U>
+		constexpr bool operator()(const T& x, const U& y) const{
 			return (x >= y);
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT less_equal : binary_function<T,T,bool>{
-		bool operator()(const T& x, const T& y) const{
+		constexpr bool operator()(const T& x, const T& y) const{
+			return (x <= y);
+		}
+	};
+
+	template <> struct _UCXXEXPORT less_equal<void> : binary_function<void,void,bool>{
+		template<class T, class U>
+		constexpr bool operator()(const T& x, const U& y) const{
 			return (x <= y);
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT logical_and : binary_function<T,T,bool> {
-		bool operator()(const T& x, const T& y) const{
+		constexpr bool operator()(const T& x, const T& y) const{
 			return (x && y);
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT logical_or : binary_function<T,T,bool> {
-		bool operator()(const T& x, const T& y) const{
+		constexpr bool operator()(const T& x, const T& y) const{
 			return (x || y);
 		}
 	};
 
 	template <class T> struct _UCXXEXPORT logical_not : unary_function<T,bool> {
-		bool operator()(const T& x) const{
+		constexpr bool operator()(const T& x) const{
 			return !x;
 		}
 	};
